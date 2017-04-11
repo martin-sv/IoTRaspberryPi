@@ -84,6 +84,7 @@ namespace IoTRaspberryPi
                 var i2cDeviceControllers = await DeviceInformation.FindAllAsync(deviceSelector);
                 //this._i2cPortExpander = await I2cDevice.FromIdAsync(i2cDeviceControllers[0].Id, i2cSettings);
 
+                //Changed to use Lightning Provider
                 I2cController controller = (await I2cController.GetControllersAsync(LightningI2cProvider.GetI2cProvider()))[0];
                 this._i2cPortExpander = controller.GetDevice(i2cSettings);
                 //this._i2cPortExpander = controller.GetDevice(new I2cConnectionSettings(0x90 >> 1));
@@ -161,6 +162,49 @@ namespace IoTRaspberryPi
             }
         }
 
+        /**
+        * Prints in two lines
+        **/
+        public void Print2Lines(string text)
+        {
+            if (text != null)
+            {
+                for (int i = 0; i < text.Length & i < 16; i++)
+                {
+                    this.printc(text[i]);
+                }
+                if (text.Length >= 16)
+                {
+                    this.gotoSecondLine();
+                    for (int i = 16; i < text.Length & i < 32; i++)
+                    {
+                        this.printc(text[i]);
+                    }
+                }
+            }
+        }
+
+        /**
+        * Prints in two lines
+        **/
+        public void Print2Lines(string line1 = "", string line2 = "")
+        {
+            if (line1 != null)
+            {
+                for (int i = 0; i < line1.Length & i < 16; i++)
+                {
+                    this.printc(line1[i]);
+                }
+            }
+            this.gotoSecondLine();
+            if (line2 != null)
+            {
+                for (int i = 0; i < line2.Length & i < 16; i++)
+                {
+                    this.printc(line2[i]);
+                }
+            }
+        }
 
         /**
         * Print single character onto display

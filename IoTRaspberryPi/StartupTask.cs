@@ -26,7 +26,7 @@ namespace IoTRaspberryPi
         Button button;
         RGBLed rgbLed;
         FCP8591Lightning ADConverter;
-        LCD lcd;
+        LCDDisplayI2C lcd;
 
         private ThreadPoolTimer timer;
         private Timer LedTimer;
@@ -76,11 +76,10 @@ namespace IoTRaspberryPi
             button = new Button();
             rgbLed = new RGBLed();
             //ADConverter = new FCP8591Lightning();
-            //lcd = new LCD();
-            LCDDisplayI2C lcd = new LCDDisplayI2C(0x27, "I2C1", 0, 1, 2, 4, 5, 6, 7, 3);
+            lcd = new LCDDisplayI2C(0x27, "I2C1", 0, 1, 2, 4, 5, 6, 7, 3);
             lcd.init();
-            lcd.prints("Hello World");
-
+            lcd.Print2Lines("01234567890123456789012345678901234567890");
+            
             //OnButtonClick
             button.ValueChanged += Button_ValueChanged;
 
@@ -95,8 +94,16 @@ namespace IoTRaspberryPi
             motorPin.SetActiveDutyCyclePercentage(RestingPulseLegnth);
             motorPin.Start();
             */
+            txt = new string[4,2];
+            txt[0,0] = "Hola Romi";
+            txt[1,0] = "Te AMO!";
+            txt[2,0] = "Queres ir al";
+            txt[2,1] = "Cine Conmigo?";
+            txt[3,0] = "El Jueves";
         }
 
+        string[,] txt;
+        int time = 0;
         /// <summary>
         /// OnButtonClick
         /// </summary>
@@ -112,6 +119,15 @@ namespace IoTRaspberryPi
                 Debug.WriteLine("Button Pressed");
                 laser.TurnLaserOn();
                 LedTimer = new Timer(rgbLed.ConstantChange, null, 0, 5);
+                if (time < txt.Length / txt.Rank)
+                {
+                    lcd.clrscr();
+                    lcd.Print2Lines(txt[time,0],txt[time,1]);
+                    time++;
+                } else
+                {
+                    lcd.clrscr();
+                }
             }
             else
             {
