@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Windows.Devices.I2c;
-
 namespace IoTRaspberryPi
 {
     public class PCF8591 : IDisposable

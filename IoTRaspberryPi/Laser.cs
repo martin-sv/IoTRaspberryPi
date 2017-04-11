@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Devices.Gpio;
+using Microsoft.IoT.Lightning.Providers;
 
 namespace IoTRaspberryPi
 {
@@ -11,7 +12,7 @@ namespace IoTRaspberryPi
     {
         private const int default_pin = 25;
         private int pin = 25;
-        private GpioPin laser;
+        private GpioPin laser = null;
 
         public Laser(int pin = default_pin)
         {

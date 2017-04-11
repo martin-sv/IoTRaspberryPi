@@ -9,8 +9,10 @@ using Windows.System.Threading;
 using System.Threading;
 using System.Diagnostics;
 using Windows.Devices.Pwm;
+using Microsoft.IoT.Lightning.Providers;
+using Windows.Devices;
+using Windows.Devices.I2c;
 //using PwmSoftware;
-//using Microsoft.IoT.Lightning.Providers;
 
 // The Background Application template is documented at http://go.microsoft.com/fwlink/?LinkID=533884&clcid=0x409
 
@@ -21,9 +23,9 @@ namespace IoTRaspberryPi
         BackgroundTaskDeferral deferral;
 
         PCF8591 ADConverter { get; set; }
-        Laser laser = new Laser();
-        Button button = new Button();
-        RGBLed rgbLed = new RGBLed();
+        Laser laser;
+        Button button;
+        RGBLed rgbLed;
 
         private const int BUZZER_PIN = 24;
 
@@ -39,25 +41,68 @@ namespace IoTRaspberryPi
         PwmPin motorPin;
         PwmController pwmController;
 
+
+
+        private const int LED_PIN = 25;
+        private GpioPin pin = null;
+
         public void Run(IBackgroundTaskInstance taskInstance)
         {
             // set deferral to keep the Application running at the end of the method.
             deferral = taskInstance.GetDeferral();
+
+            // Set the Lightning Provider as the default if Lightning driver is enabled on the target device
+            // Otherwise, the inbox provider will continue to be the default
+            if (LightningProvider.IsLightningEnabled)
+            {
+                // Set Lightning as the default provider
+                LowLevelDevicesController.DefaultProvider = LightningProvider.GetAggregateProvider();
+                Debug.WriteLine("GPIO Using Lightning Provider");
+            }
+            else
+            {
+                Debug.WriteLine("GPIO Using Default Provider");
+            }
+
+            var gpioController = GpioController.GetDefault(); /* Get the default GPIO controller on the system */
+            if (gpioController == null)
+            {
+                Debug.WriteLine("No GPIO Controller found!");
+            }
+
             InitGPIO();
         }
 
 
-
+        private ThreadPoolTimer timer;
+        I2cDevice sensor;
 
 
         private async void InitGPIO()
         {
             // creates a PCF8591 instance
-            ADConverter = await PCF8591.Create();
+            laser = new Laser();
+            button = new Button();
+            rgbLed = new RGBLed();
+            //ADConverter = await PCF8591.Create();
+
             // set timer to be executed every 500ms.
-            var timer = new System.Threading.Timer(Timer_Tick_ADConverter, null, 500, 300);
+            //var timer = new System.Threading.Timer(Timer_Tick_ADConverter, null, 500, 3000);
+            //Timer_Tick_ADConverter(new object());
 
             button.ValueChanged += Button_ValueChanged;
+
+
+
+            // The code below should work the same with any provider, including Lightning and the default one.
+            I2cController controller = await I2cController.GetDefaultAsync();
+            //I2cController controller2 = (await I2cController.GetControllersAsync(LightningI2cProvider.GetI2cProvider()))[0];
+            // Ox40 was determined by looking at the datasheet for the Weather shield
+
+            sensor = controller.GetDevice(new I2cConnectionSettings(0x90 >> 1));
+
+            timer = ThreadPoolTimer.CreatePeriodicTimer(Timer_Tick, TimeSpan.FromMilliseconds(1000));
+            //Timer_Tick();
 
 
             /*
@@ -68,6 +113,29 @@ namespace IoTRaspberryPi
             motorPin.SetActiveDutyCyclePercentage(RestingPulseLegnth);
             motorPin.Start();
             */
+        }
+
+
+        private void Timer_Tick(ThreadPoolTimer t)
+        {
+            Debug.WriteLine("A0: " + WriteAndPrint(new byte[] { (byte)PCF8591_AnalogPin.A0 })[0]);
+            Debug.WriteLine("A1: " + WriteAndPrint(new byte[] { (byte)PCF8591_AnalogPin.A1 })[0]);
+            Debug.WriteLine("A2: " + WriteAndPrint(new byte[] { (byte)PCF8591_AnalogPin.A2 })[0]);
+            Debug.WriteLine("A3: " + WriteAndPrint(new byte[] { (byte)PCF8591_AnalogPin.A3 })[0]);
+        }
+
+        private byte[] WriteAndPrint(byte[] command)
+        {
+            try
+            {
+                byte[] b = new byte[2];
+                sensor.WriteReadPartial(command, b);
+                return b;
+            } catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
+            }
+            return new byte[1];
         }
 
         private void Timer_Tick_ADConverter(object sender)
