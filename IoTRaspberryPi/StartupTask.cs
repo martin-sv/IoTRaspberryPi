@@ -26,6 +26,7 @@ namespace IoTRaspberryPi
         Button button;
         RGBLed rgbLed;
         FCP8591Lightning ADConverter;
+        LCD lcd;
 
         private ThreadPoolTimer timer;
         private Timer LedTimer;
@@ -74,13 +75,17 @@ namespace IoTRaspberryPi
             laser = new Laser();
             button = new Button();
             rgbLed = new RGBLed();
-            ADConverter = new FCP8591Lightning();
+            //ADConverter = new FCP8591Lightning();
+            //lcd = new LCD();
+            LCDDisplayI2C lcd = new LCDDisplayI2C(0x27, "I2C1", 0, 1, 2, 4, 5, 6, 7, 3);
+            lcd.init();
+            lcd.prints("Hello World");
 
             //OnButtonClick
             button.ValueChanged += Button_ValueChanged;
 
             //Read ADConverter (Stick + Potenciomenter)
-            timer = ThreadPoolTimer.CreatePeriodicTimer(Timer_Tick, TimeSpan.FromMilliseconds(1000));
+            //timer = ThreadPoolTimer.CreatePeriodicTimer(ADConverter_Timer_Tick, TimeSpan.FromMilliseconds(1000));
 
             /*
             timer2 = ThreadPoolTimer.CreatePeriodicTimer(Timer_Tick2, TimeSpan.FromSeconds(2));
@@ -126,7 +131,7 @@ namespace IoTRaspberryPi
         }
 
 
-        private void Timer_Tick(ThreadPoolTimer timer)
+        private void ADConverter_Timer_Tick(ThreadPoolTimer timer)
         {
             try
             {
