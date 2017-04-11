@@ -95,8 +95,8 @@ namespace IoTRaspberryPi
 
 
             // The code below should work the same with any provider, including Lightning and the default one.
-            I2cController controller = await I2cController.GetDefaultAsync();
-            //I2cController controller2 = (await I2cController.GetControllersAsync(LightningI2cProvider.GetI2cProvider()))[0];
+            //I2cController controller = await I2cController.GetDefaultAsync();
+            I2cController controller = (await I2cController.GetControllersAsync(LightningI2cProvider.GetI2cProvider()))[0];
             // Ox40 was determined by looking at the datasheet for the Weather shield
 
             sensor = controller.GetDevice(new I2cConnectionSettings(0x90 >> 1));
@@ -116,26 +116,42 @@ namespace IoTRaspberryPi
         }
 
 
-        private void Timer_Tick(ThreadPoolTimer t)
+        private void Timer_Tick(ThreadPoolTimer timer)
         {
-            Debug.WriteLine("A0: " + WriteAndPrint(new byte[] { (byte)PCF8591_AnalogPin.A0 })[0]);
-            Debug.WriteLine("A1: " + WriteAndPrint(new byte[] { (byte)PCF8591_AnalogPin.A1 })[0]);
-            Debug.WriteLine("A2: " + WriteAndPrint(new byte[] { (byte)PCF8591_AnalogPin.A2 })[0]);
-            Debug.WriteLine("A3: " + WriteAndPrint(new byte[] { (byte)PCF8591_AnalogPin.A3 })[0]);
+            int y = ReadI2CAnalog(PCF8591_AnalogPin.A0);
+            int x = ReadI2CAnalog(PCF8591_AnalogPin.A1);
+            int btn = ReadI2CAnalog(PCF8591_AnalogPin.A2);
+            int pot = ReadI2CAnalog(PCF8591_AnalogPin.A3);
+            Debug.WriteLine("Y: {0} |X: {1} |Btn: {2} |Pot: {3} ", y, x, btn, pot);
         }
 
-        private byte[] WriteAndPrint(byte[] command)
+        /// <summary>
+        /// Returns an int value from 0 to 255 (included).
+        /// </summary>
+        /// <param name="InputPin">The Input pin on the PCF8591 to read analog value from</param>
+        /// <returns>int</returns>
+        private int ReadI2CAnalog(PCF8591_AnalogPin InputPin)
         {
             try
             {
                 byte[] b = new byte[2];
-                sensor.WriteReadPartial(command, b);
-                return b;
+                sensor.WriteRead(new byte[] { (byte)InputPin }, b);
+                return b[1];
             } catch (Exception e)
             {
                 Debug.WriteLine(e.Message);
+                return -1;
             }
-            return new byte[1];
+        }
+
+        /// <summary>
+        /// Returns an double value from 0 to 1.
+        /// </summary>
+        /// <param name="InputPin">The Input pin on the PCF8591 to read analog value from</param>
+        /// <returns>double</returns>
+        public double ReadI2CAnalog_AsDouble(PCF8591_AnalogPin InputPin)
+        {
+            return ReadI2CAnalog(InputPin) / 255d;
         }
 
         private void Timer_Tick_ADConverter(object sender)
