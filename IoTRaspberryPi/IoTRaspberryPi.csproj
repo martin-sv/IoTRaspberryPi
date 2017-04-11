@@ -98,7 +98,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Button.cs" />
-    <Compile Include="FCP8591.cs" />
+    <Compile Include="FCP8591Lightning.cs" />
+    <Compile Include="FCP8591Refault.cs" />
     <Compile Include="Laser.cs" />
     <Compile Include="RGBLed.cs" />
     <Compile Include="StartupTask.cs" />

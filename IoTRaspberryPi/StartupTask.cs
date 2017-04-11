@@ -22,10 +22,10 @@ namespace IoTRaspberryPi
     {
         BackgroundTaskDeferral deferral;
 
-        PCF8591 ADConverter { get; set; }
         Laser laser;
         Button button;
         RGBLed rgbLed;
+        FCP8591Lightning ADConverter;
 
         private const int BUZZER_PIN = 24;
 
@@ -78,31 +78,19 @@ namespace IoTRaspberryPi
         I2cDevice sensor;
 
 
-        private async void InitGPIO()
+        private void InitGPIO()
         {
             // creates a PCF8591 instance
             laser = new Laser();
             button = new Button();
             rgbLed = new RGBLed();
-            //ADConverter = await PCF8591.Create();
+            ADConverter = new FCP8591Lightning();
 
-            // set timer to be executed every 500ms.
-            //var timer = new System.Threading.Timer(Timer_Tick_ADConverter, null, 500, 3000);
-            //Timer_Tick_ADConverter(new object());
-
+            //OnButtonClick
             button.ValueChanged += Button_ValueChanged;
 
-
-
-            // The code below should work the same with any provider, including Lightning and the default one.
-            //I2cController controller = await I2cController.GetDefaultAsync();
-            I2cController controller = (await I2cController.GetControllersAsync(LightningI2cProvider.GetI2cProvider()))[0];
-            // Ox40 was determined by looking at the datasheet for the Weather shield
-
-            sensor = controller.GetDevice(new I2cConnectionSettings(0x90 >> 1));
-
+            //Read ADConverter (Stick + Potenciomenter)
             timer = ThreadPoolTimer.CreatePeriodicTimer(Timer_Tick, TimeSpan.FromMilliseconds(1000));
-            //Timer_Tick();
 
 
             /*
@@ -115,45 +103,69 @@ namespace IoTRaspberryPi
             */
         }
 
-
-        private void Timer_Tick(ThreadPoolTimer timer)
-        {
-            int y = ReadI2CAnalog(PCF8591_AnalogPin.A0);
-            int x = ReadI2CAnalog(PCF8591_AnalogPin.A1);
-            int btn = ReadI2CAnalog(PCF8591_AnalogPin.A2);
-            int pot = ReadI2CAnalog(PCF8591_AnalogPin.A3);
-            Debug.WriteLine("Y: {0} |X: {1} |Btn: {2} |Pot: {3} ", y, x, btn, pot);
-        }
-
         /// <summary>
-        /// Returns an int value from 0 to 255 (included).
+        /// OnButtonClick
         /// </summary>
-        /// <param name="InputPin">The Input pin on the PCF8591 to read analog value from</param>
-        /// <returns>int</returns>
-        private int ReadI2CAnalog(PCF8591_AnalogPin InputPin)
+        /// <param name="sender"></param>
+        /// <param name="pushStatus"></param>
+        /// <param name="e"></param>
+        private void Button_ValueChanged(Button sender, PushStatus pushStatus, GpioPinValueChangedEventArgs e)
         {
-            try
+            // toggle the state of the LED every time the button is pressed
+            if (pushStatus == PushStatus.DOWN)
             {
-                byte[] b = new byte[2];
-                sensor.WriteRead(new byte[] { (byte)InputPin }, b);
-                return b[1];
-            } catch (Exception e)
+                //RandomGpioPinValue(pins[i]);
+                Debug.WriteLine("Button Pressed");
+                laser.TurnLaserOn();
+                constantTimer = new Timer(rgbLed.ConstantChange, null, 0, 5);
+            }
+            else
             {
-                Debug.WriteLine(e.Message);
-                return -1;
+                Debug.WriteLine("Button Released");
+                laser.TurnLaserOff();
+                rgbLed.TurnOff();
+                //Stop timer and LED
+                try
+                {
+                    constantTimer.Dispose();
+                }
+                catch
+                {
+
+                }
             }
         }
 
-        /// <summary>
-        /// Returns an double value from 0 to 1.
-        /// </summary>
-        /// <param name="InputPin">The Input pin on the PCF8591 to read analog value from</param>
-        /// <returns>double</returns>
-        public double ReadI2CAnalog_AsDouble(PCF8591_AnalogPin InputPin)
+
+        private void Timer_Tick(ThreadPoolTimer timer)
         {
-            return ReadI2CAnalog(InputPin) / 255d;
+            try
+            {
+                double y = ADConverter.ReadI2CAnalog_AsDouble(FCP8591Lightning.PCF8591_AnalogPin.A0);
+                double x = ADConverter.ReadI2CAnalog_AsDouble(FCP8591Lightning.PCF8591_AnalogPin.A1);
+                double btn = ADConverter.ReadI2CAnalog_AsDouble(FCP8591Lightning.PCF8591_AnalogPin.A2);
+                double pot = ADConverter.ReadI2CAnalog_AsDouble(FCP8591Lightning.PCF8591_AnalogPin.A3);
+                Debug.WriteLine("Y: {0} |X: {1} |Btn: {2} |Pot: {3} ", y, x, btn, pot);
+
+                double y1 = ADConverter.ReadI2CAnalog_AsDouble_2Decimal(FCP8591Lightning.PCF8591_AnalogPin.A0);
+                double x1 = ADConverter.ReadI2CAnalog_AsDouble_2Decimal(FCP8591Lightning.PCF8591_AnalogPin.A1);
+                double btn1 = ADConverter.ReadI2CAnalog_AsDouble_2Decimal(FCP8591Lightning.PCF8591_AnalogPin.A2);
+                double pot1 = ADConverter.ReadI2CAnalog_AsDouble_2Decimal(FCP8591Lightning.PCF8591_AnalogPin.A3);
+                Debug.WriteLine("Y: {0} |X: {1} |Btn: {2} |Pot: {3} ", y1, x1, btn1, pot1);
+
+
+            }
+            catch (Exception e)
+            {
+                // dispose the PCF8591.
+                ADConverter.Dispose();
+                // Terminates the application.
+                deferral.Complete();
+            }
         }
 
+
+        /*
         private void Timer_Tick_ADConverter(object sender)
         {
             try
@@ -175,7 +187,7 @@ namespace IoTRaspberryPi
                 deferral.Complete();
             }
         }
-
+        */
 
         private void Timer_Tick2(ThreadPoolTimer timer)
         {
@@ -223,34 +235,6 @@ namespace IoTRaspberryPi
             while (ticks >= 0)
             {
                 ticks--;
-            }
-        }
-
-        //private void Button_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs e)
-        private void Button_ValueChanged(Button sender, PushStatus pushStatus, GpioPinValueChangedEventArgs e)
-        {
-            // toggle the state of the LED every time the button is pressed
-            if (pushStatus == PushStatus.DOWN)
-            {
-                //RandomGpioPinValue(pins[i]);
-                Debug.WriteLine("Button Pressed");
-                laser.TurnLaserOn();
-                constantTimer = new Timer(rgbLed.ConstantChange, null, 0, 5);
-            }
-            else
-            {
-                Debug.WriteLine("Button Released");
-                laser.TurnLaserOff();
-                rgbLed.TurnOff();
-                //Stop timer and LED
-                try
-                {
-                    constantTimer.Dispose();
-                }
-                catch
-                {
-
-                }
             }
         }
     }
