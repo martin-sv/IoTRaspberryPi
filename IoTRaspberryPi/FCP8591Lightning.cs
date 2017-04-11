@@ -75,6 +75,28 @@ namespace IoTRaspberryPi
             return (Math.Round(ReadI2CAnalog_AsDouble(InputPin) * 100) / 100);
         }
 
+        /*
+        /// <summary>
+        /// Returns an double value from 0 to 1.
+        /// </summary>
+        /// <param name="InputPin">The Input pin on the PCF8591 to read analog value from</param>
+        /// <returns>double</returns>
+        public double ReadI2CAnalog_AsDouble_XDecimal(PCF8591_AnalogPin InputPin, int decimals)
+        {
+            //double res = ReadI2CAnalog_AsDouble(InputPin);
+            double res = 99.123456789;
+            if (decimals == 0)
+                return Math.Round(res);
+            for (int i = 1; i <= decimals; i++)
+                res *= 10;
+            res = Math.Round(res);
+            for (int i = 1; i <= decimals; i++)
+                res /= 10;
+
+            return res;
+        }
+        */
+
         public void Dispose()
         {
             this.sensor.Dispose();

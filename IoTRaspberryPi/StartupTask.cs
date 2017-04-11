@@ -92,7 +92,6 @@ namespace IoTRaspberryPi
             //Read ADConverter (Stick + Potenciomenter)
             timer = ThreadPoolTimer.CreatePeriodicTimer(Timer_Tick, TimeSpan.FromMilliseconds(1000));
 
-
             /*
             timer2 = ThreadPoolTimer.CreatePeriodicTimer(Timer_Tick2, TimeSpan.FromSeconds(2));
             pwmController = (await PwmController.GetControllersAsync(PwmProviderSoftware.GetPwmProvider()))[0];
@@ -152,8 +151,6 @@ namespace IoTRaspberryPi
                 double btn1 = ADConverter.ReadI2CAnalog_AsDouble_2Decimal(FCP8591Lightning.PCF8591_AnalogPin.A2);
                 double pot1 = ADConverter.ReadI2CAnalog_AsDouble_2Decimal(FCP8591Lightning.PCF8591_AnalogPin.A3);
                 Debug.WriteLine("Y: {0} |X: {1} |Btn: {2} |Pot: {3} ", y1, x1, btn1, pot1);
-
-
             }
             catch (Exception e)
             {
