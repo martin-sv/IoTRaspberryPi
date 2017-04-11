@@ -27,11 +27,10 @@ namespace IoTRaspberryPi
         RGBLed rgbLed;
         FCP8591Lightning ADConverter;
 
+        private ThreadPoolTimer timer;
+        private Timer LedTimer;
+
         private const int BUZZER_PIN = 24;
-
-
-        private Timer constantTimer;
-
         double ClockwisePulseLength = 1;
         double CounterClockwisePulseLegnth = 2;
         double RestingPulseLegnth = 0;
@@ -40,10 +39,6 @@ namespace IoTRaspberryPi
         int iteration = 0;
         PwmPin motorPin;
         PwmController pwmController;
-
-
-
-        private const int LED_PIN = 25;
         private GpioPin pin = null;
 
         public void Run(IBackgroundTaskInstance taskInstance)
@@ -72,11 +67,6 @@ namespace IoTRaspberryPi
 
             InitGPIO();
         }
-
-
-        private ThreadPoolTimer timer;
-        I2cDevice sensor;
-
 
         private void InitGPIO()
         {
@@ -116,7 +106,7 @@ namespace IoTRaspberryPi
                 //RandomGpioPinValue(pins[i]);
                 Debug.WriteLine("Button Pressed");
                 laser.TurnLaserOn();
-                constantTimer = new Timer(rgbLed.ConstantChange, null, 0, 5);
+                LedTimer = new Timer(rgbLed.ConstantChange, null, 0, 5);
             }
             else
             {
@@ -126,7 +116,7 @@ namespace IoTRaspberryPi
                 //Stop timer and LED
                 try
                 {
-                    constantTimer.Dispose();
+                    LedTimer.Dispose();
                 }
                 catch
                 {
@@ -154,6 +144,7 @@ namespace IoTRaspberryPi
             }
             catch (Exception e)
             {
+                Debug.WriteLine(e.Message);
                 // dispose the PCF8591.
                 ADConverter.Dispose();
                 // Terminates the application.
