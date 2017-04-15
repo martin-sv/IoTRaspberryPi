@@ -30,7 +30,7 @@ namespace IoTRaspberryPi
 
         WebServer webServer;
 
-        private ThreadPoolTimer timer;
+        private ThreadPoolTimer timer2;
         private Timer LedTimer;
 
         private const int BUZZER_PIN = 24;
@@ -71,7 +71,7 @@ namespace IoTRaspberryPi
             InitGPIO();
         }
 
-        private void InitGPIO()
+        private async void InitGPIO()
         {
             // creates a PCF8591 instance
             laser = new Laser();
@@ -93,14 +93,14 @@ namespace IoTRaspberryPi
             //Read ADConverter (Stick + Potenciomenter)
             //timer = ThreadPoolTimer.CreatePeriodicTimer(ADConverter_Timer_Tick, TimeSpan.FromMilliseconds(1000));
 
-            /*
-            timer2 = ThreadPoolTimer.CreatePeriodicTimer(Timer_Tick2, TimeSpan.FromSeconds(2));
-            pwmController = (await PwmController.GetControllersAsync(PwmProviderSoftware.GetPwmProvider()))[0];
-            pwmController.SetDesiredFrequency(50);
+            var pwmControllers = await PwmController.GetControllersAsync(LightningPwmProvider.GetPwmProvider());
+            pwmController = pwmControllers[1]; // use the on-device controller
+            pwmController.SetDesiredFrequency(250); // try to match 50Hz
             motorPin = pwmController.OpenPin(24);
-            motorPin.SetActiveDutyCyclePercentage(RestingPulseLegnth);
+            motorPin.SetActiveDutyCyclePercentage(0.25);
             motorPin.Start();
-            */
+            timer2 = ThreadPoolTimer.CreatePeriodicTimer(Timer_Tick3, TimeSpan.FromMilliseconds(500));
+
             txt = new string[4,2];
             txt[0,0] = "Hola Romi";
             txt[1,0] = "Te AMO!";
@@ -109,6 +109,29 @@ namespace IoTRaspberryPi
             txt[3,0] = "El Jueves";
 
             webServer.StartServer();
+        }
+
+        private void Timer_Tick3(ThreadPoolTimer timer)
+        {
+            iteration++;
+            if (iteration % 3 == 0)
+            {
+                currentPulseLength = ClockwisePulseLength;
+                secondPulseLength = CounterClockwisePulseLegnth;
+            }
+            else if (iteration % 3 == 1)
+            {
+                currentPulseLength = CounterClockwisePulseLegnth;
+                secondPulseLength = ClockwisePulseLength;
+            }
+            else
+            {
+                currentPulseLength = 0;
+                secondPulseLength = 0;
+            }
+
+            double desiredPercentage = currentPulseLength / (1000.0 / pwmController.ActualFrequency);
+            motorPin.SetActiveDutyCyclePercentage(desiredPercentage);
         }
 
         private void WebServer_NewMessage(WebServer sender, string message)

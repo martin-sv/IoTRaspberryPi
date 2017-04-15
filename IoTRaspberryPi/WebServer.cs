@@ -103,6 +103,7 @@ namespace IoTRaspberryPi
             string text = url.ToString();
             text = text.Substring(text.IndexOf('=') + 1);
             message = request.ToString();
+
             if (message.IndexOf("Message=") != -1)
             {
                 message = message.Substring(message.IndexOf("Message=") + 8);

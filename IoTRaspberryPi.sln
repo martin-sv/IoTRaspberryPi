@@ -5,8 +5,6 @@ VisualStudioVersion = 15.0.26403.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoTRaspberryPi", "IoTRaspberryPi\IoTRaspberryPi.csproj", "{E1032A57-D591-471A-A1B4-9CD934C51A7D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebServer", "WebServer\WebServer.csproj", "{52373CA5-B6DA-4B4F-A0A1-9F46AB281755}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
@@ -35,24 +33,6 @@ Global
 		{E1032A57-D591-471A-A1B4-9CD934C51A7D}.Release|x86.ActiveCfg = Release|x86
 		{E1032A57-D591-471A-A1B4-9CD934C51A7D}.Release|x86.Build.0 = Release|x86
 		{E1032A57-D591-471A-A1B4-9CD934C51A7D}.Release|x86.Deploy.0 = Release|x86
-		{52373CA5-B6DA-4B4F-A0A1-9F46AB281755}.Debug|ARM.ActiveCfg = Debug|ARM
-		{52373CA5-B6DA-4B4F-A0A1-9F46AB281755}.Debug|ARM.Build.0 = Debug|ARM
-		{52373CA5-B6DA-4B4F-A0A1-9F46AB281755}.Debug|ARM.Deploy.0 = Debug|ARM
-		{52373CA5-B6DA-4B4F-A0A1-9F46AB281755}.Debug|x64.ActiveCfg = Debug|x64
-		{52373CA5-B6DA-4B4F-A0A1-9F46AB281755}.Debug|x64.Build.0 = Debug|x64
-		{52373CA5-B6DA-4B4F-A0A1-9F46AB281755}.Debug|x64.Deploy.0 = Debug|x64
-		{52373CA5-B6DA-4B4F-A0A1-9F46AB281755}.Debug|x86.ActiveCfg = Debug|x86
-		{52373CA5-B6DA-4B4F-A0A1-9F46AB281755}.Debug|x86.Build.0 = Debug|x86
-		{52373CA5-B6DA-4B4F-A0A1-9F46AB281755}.Debug|x86.Deploy.0 = Debug|x86
-		{52373CA5-B6DA-4B4F-A0A1-9F46AB281755}.Release|ARM.ActiveCfg = Release|ARM
-		{52373CA5-B6DA-4B4F-A0A1-9F46AB281755}.Release|ARM.Build.0 = Release|ARM
-		{52373CA5-B6DA-4B4F-A0A1-9F46AB281755}.Release|ARM.Deploy.0 = Release|ARM
-		{52373CA5-B6DA-4B4F-A0A1-9F46AB281755}.Release|x64.ActiveCfg = Release|x64
-		{52373CA5-B6DA-4B4F-A0A1-9F46AB281755}.Release|x64.Build.0 = Release|x64
-		{52373CA5-B6DA-4B4F-A0A1-9F46AB281755}.Release|x64.Deploy.0 = Release|x64
-		{52373CA5-B6DA-4B4F-A0A1-9F46AB281755}.Release|x86.ActiveCfg = Release|x86
-		{52373CA5-B6DA-4B4F-A0A1-9F46AB281755}.Release|x86.Build.0 = Release|x86
-		{52373CA5-B6DA-4B4F-A0A1-9F46AB281755}.Release|x86.Deploy.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
