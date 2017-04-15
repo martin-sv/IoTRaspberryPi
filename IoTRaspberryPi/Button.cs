@@ -19,7 +19,6 @@ namespace IoTRaspberryPi
         public delegate void ButtonUpEventHandler(Button sender, GpioPinValueChangedEventArgs e);
         public event ButtonUpEventHandler ButtonUp;
 
-
         // A delegate type for hooking up change notifications.
         public delegate void ChangedEventHandler(Button sender, PushStatus buttonStatus, GpioPinValueChangedEventArgs e);
         public event ChangedEventHandler ValueChanged;

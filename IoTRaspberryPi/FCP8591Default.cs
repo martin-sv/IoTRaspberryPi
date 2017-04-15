@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Windows.Devices.I2c;
 namespace IoTRaspberryPi
 {
-    public class PCF8591 : IDisposable
+    public class FCP8591Default : IDisposable
 
     {
         /// <summary>
@@ -17,13 +17,13 @@ namespace IoTRaspberryPi
         /// private constructor for internal use only.
         /// To instanciate a PCF8591 object, please use the static method PCF8591.Create();
         /// </summary>
-        private PCF8591() { }
+        private FCP8591Default() { }
 
         /// <summary>
         /// Instanciate asyncronously a new PCF8591 object.
         /// </summary>
         /// <returns>A new PCF8591 object instance.</returns>
-        public static Windows.Foundation.IAsyncOperation<PCF8591> Create()
+        public static Windows.Foundation.IAsyncOperation<FCP8591Default> Create()
         {
             return CreateAsync(I2cBusSpeed.StandardMode, I2cSharingMode.Exclusive).AsAsyncOperation();
         }
@@ -33,7 +33,7 @@ namespace IoTRaspberryPi
         /// </summary>
         /// <param name="BusSpeed">The I2C Bus Speed. Default value: StandardMode </param>
         /// <returns>A new PCF8591 object instance.</returns>
-        public static Windows.Foundation.IAsyncOperation<PCF8591> Create(I2cBusSpeed BusSpeed)
+        public static Windows.Foundation.IAsyncOperation<FCP8591Default> Create(I2cBusSpeed BusSpeed)
         {
             return CreateAsync(BusSpeed, I2cSharingMode.Exclusive).AsAsyncOperation();
         }
@@ -44,7 +44,7 @@ namespace IoTRaspberryPi
         /// <param name="BusSpeed">The I2C Bus Speed. Default value: StandardMode </param>
         /// <param name="SharingMode">The I2C Sharing Mode. Default value is Exclusive. To use with caution </param>
         /// <returns>A new PCF8591 object instance.</returns>
-        public static Windows.Foundation.IAsyncOperation<PCF8591> Create(I2cBusSpeed BusSpeed, I2cSharingMode SharingMode)
+        public static Windows.Foundation.IAsyncOperation<FCP8591Default> Create(I2cBusSpeed BusSpeed, I2cSharingMode SharingMode)
         {
             return CreateAsync(BusSpeed, SharingMode).AsAsyncOperation();
         }
@@ -56,9 +56,9 @@ namespace IoTRaspberryPi
         /// <param name="BusSpeed">The I2C Bus Speed. Default value: StandardMode </param>
         /// <param name="SharingMode">The I2C Sharing Mode. Default value is Exclusive. To use with caution </param>
         /// <returns></returns>
-        async static private Task<PCF8591> CreateAsync(I2cBusSpeed BusSpeed, I2cSharingMode SharingMode)
+        async static private Task<FCP8591Default> CreateAsync(I2cBusSpeed BusSpeed, I2cSharingMode SharingMode)
         {
-            PCF8591 newADC = new PCF8591();
+            FCP8591Default newADC = new FCP8591Default();
             /// advanced query syntax used to find devices on the RaspberryPi.
             string AQS = Windows.Devices.I2c.I2cDevice.GetDeviceSelector();
             var DevicesInfo = await Windows.Devices.Enumeration.DeviceInformation.FindAllAsync(AQS);

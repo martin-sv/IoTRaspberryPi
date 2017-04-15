@@ -28,6 +28,8 @@ namespace IoTRaspberryPi
         FCP8591Lightning ADConverter;
         LCDDisplayI2C lcd;
 
+        WebServer webServer;
+
         private ThreadPoolTimer timer;
         private Timer LedTimer;
 
@@ -79,9 +81,14 @@ namespace IoTRaspberryPi
             lcd = new LCDDisplayI2C(0x27, "I2C1", 0, 1, 2, 4, 5, 6, 7, 3);
             lcd.init();
             lcd.Print2Lines("01234567890123456789012345678901234567890");
-            
+
+            webServer = new WebServer();
+
             //OnButtonClick
             button.ValueChanged += Button_ValueChanged;
+
+            //OnNewMessageFromWebToLCD
+            webServer.NewMessage += WebServer_NewMessage;
 
             //Read ADConverter (Stick + Potenciomenter)
             //timer = ThreadPoolTimer.CreatePeriodicTimer(ADConverter_Timer_Tick, TimeSpan.FromMilliseconds(1000));
@@ -100,6 +107,14 @@ namespace IoTRaspberryPi
             txt[2,0] = "Queres ir al";
             txt[2,1] = "Cine Conmigo?";
             txt[3,0] = "El Jueves";
+
+            webServer.StartServer();
+        }
+
+        private void WebServer_NewMessage(WebServer sender, string message)
+        {
+            lcd.clrscr();
+            lcd.Print2Lines(message);
         }
 
         string[,] txt;

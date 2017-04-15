@@ -32,9 +32,6 @@ namespace IoTRaspberryPi
             sensor = controller.GetDevice(new I2cConnectionSettings(0x90 >> 1));
         }
 
-
-
-
         /// <summary>
         /// Returns an int value from 0 to 255 (included).
         /// </summary>
