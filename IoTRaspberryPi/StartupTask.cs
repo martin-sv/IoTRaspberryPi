@@ -27,22 +27,11 @@ namespace IoTRaspberryPi
         RGBLed rgbLed;
         FCP8591Lightning ADConverter;
         LCDDisplayI2C lcd;
-
+        Buzzer buzzer;
         WebServer webServer;
 
         private ThreadPoolTimer timer2;
         private Timer LedTimer;
-
-        private const int BUZZER_PIN = 24;
-        double ClockwisePulseLength = 1;
-        double CounterClockwisePulseLegnth = 2;
-        double RestingPulseLegnth = 0;
-        double currentPulseLength = 0;
-        double secondPulseLength = 0;
-        int iteration = 0;
-        PwmPin motorPin;
-        PwmController pwmController;
-        private GpioPin pin = null;
 
         public void Run(IBackgroundTaskInstance taskInstance)
         {
@@ -71,7 +60,7 @@ namespace IoTRaspberryPi
             InitGPIO();
         }
 
-        private async void InitGPIO()
+        private void InitGPIO()
         {
             // creates a PCF8591 instance
             laser = new Laser();
@@ -81,6 +70,7 @@ namespace IoTRaspberryPi
             lcd = new LCDDisplayI2C(0x27, "I2C1", 0, 1, 2, 4, 5, 6, 7, 3);
             lcd.init();
             lcd.Print2Lines("01234567890123456789012345678901234567890");
+            buzzer = new Buzzer();
 
             webServer = new WebServer();
 
@@ -93,13 +83,8 @@ namespace IoTRaspberryPi
             //Read ADConverter (Stick + Potenciomenter)
             //timer = ThreadPoolTimer.CreatePeriodicTimer(ADConverter_Timer_Tick, TimeSpan.FromMilliseconds(1000));
 
-            var pwmControllers = await PwmController.GetControllersAsync(LightningPwmProvider.GetPwmProvider());
-            pwmController = pwmControllers[1]; // use the on-device controller
-            pwmController.SetDesiredFrequency(250); // try to match 50Hz
-            motorPin = pwmController.OpenPin(24);
-            motorPin.SetActiveDutyCyclePercentage(0.25);
-            motorPin.Start();
-            timer2 = ThreadPoolTimer.CreatePeriodicTimer(Timer_Tick3, TimeSpan.FromMilliseconds(500));
+            //Buzzer Timer
+            //timer2 = ThreadPoolTimer.CreatePeriodicTimer(Timer_Tick3, TimeSpan.FromMilliseconds(500));
 
             txt = new string[4,2];
             txt[0,0] = "Hola Romi";
@@ -111,33 +96,11 @@ namespace IoTRaspberryPi
             webServer.StartServer();
         }
 
-        private void Timer_Tick3(ThreadPoolTimer timer)
-        {
-            iteration++;
-            if (iteration % 3 == 0)
-            {
-                currentPulseLength = ClockwisePulseLength;
-                secondPulseLength = CounterClockwisePulseLegnth;
-            }
-            else if (iteration % 3 == 1)
-            {
-                currentPulseLength = CounterClockwisePulseLegnth;
-                secondPulseLength = ClockwisePulseLength;
-            }
-            else
-            {
-                currentPulseLength = 0;
-                secondPulseLength = 0;
-            }
-
-            double desiredPercentage = currentPulseLength / (1000.0 / pwmController.ActualFrequency);
-            motorPin.SetActiveDutyCyclePercentage(desiredPercentage);
-        }
-
         private void WebServer_NewMessage(WebServer sender, string message)
         {
             lcd.clrscr();
             lcd.Print2Lines(message);
+            buzzer.Start();
         }
 
         string[,] txt;
@@ -166,6 +129,7 @@ namespace IoTRaspberryPi
                 {
                     lcd.clrscr();
                 }
+                buzzer.Stop();
             }
             else
             {
@@ -183,7 +147,6 @@ namespace IoTRaspberryPi
                 }
             }
         }
-
 
         private void ADConverter_Timer_Tick(ThreadPoolTimer timer)
         {
@@ -211,33 +174,9 @@ namespace IoTRaspberryPi
             }
         }
 
-
-        /*
-        private void Timer_Tick_ADConverter(object sender)
+        private void Timer_Tick3(ThreadPoolTimer timer)
         {
-            try
-            {
-                // reads the analog value from pin A0.
-                double y = ADConverter.ReadI2CAnalog_AsDouble(PCF8591_AnalogPin.A0);
-                double x = ADConverter.ReadI2CAnalog_AsDouble(PCF8591_AnalogPin.A1);
-                double bt = ADConverter.ReadI2CAnalog_AsDouble(PCF8591_AnalogPin.A2);
-                double potenciomenter = ADConverter.ReadI2CAnalog_AsDouble(PCF8591_AnalogPin.A3);
-
-                // shows value in console
-                System.Diagnostics.Debug.WriteLine("Y: {0} - X: {1} - Bt: {2} - P: {3}", y, x, bt, potenciomenter);
-            }
-            catch (Exception ex)
-            {
-                // dispose the PCF8591.
-                ADConverter.Dispose();
-                // Terminates the application.
-                deferral.Complete();
-            }
-        }
-        */
-
-        private void Timer_Tick2(ThreadPoolTimer timer)
-        {
+            /*
             iteration++;
             if (iteration % 3 == 0)
             {
@@ -254,35 +193,9 @@ namespace IoTRaspberryPi
                 currentPulseLength = 0;
                 secondPulseLength = 0;
             }
-
+            */
             //double desiredPercentage = currentPulseLength / (1000.0 / pwmController.ActualFrequency);
             //motorPin.SetActiveDutyCyclePercentage(desiredPercentage);
-            //double secondDesiredPercentage = secondPulseLength / (1000.0 / pwmController.ActualFrequency);
-            //secondMotorPin.SetActiveDutyCyclePercentage(secondDesiredPercentage);
-            rgbLed.SetRGBColor(0, 0, 0);
-        }
-
-        private void StartPWM()
-        {
-            //soft PWM loop, runs all the time
-            while (true)
-            {
-                //VER!!!!
-                /*
-                buzzer.Write(GpioPinValue.High);
-                NOP(5000);
-                buzzer.Write(GpioPinValue.Low);
-                NOP(5000);
-                */
-            }
-        }
-
-        private void NOP(int ticks)
-        {
-            while (ticks >= 0)
-            {
-                ticks--;
-            }
         }
     }
 }

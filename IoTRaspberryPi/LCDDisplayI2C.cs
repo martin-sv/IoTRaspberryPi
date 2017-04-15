@@ -215,7 +215,7 @@ namespace IoTRaspberryPi
             {
                 this.write(Convert.ToByte(letter), 1);
             }
-            catch (Exception e)
+            catch (Exception)
             {
 
             }

@@ -98,6 +98,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Button.cs" />
+    <Compile Include="Buzzer.cs" />
     <Compile Include="LCDDisplayI2C.cs" />
     <Compile Include="FCP8591Lightning.cs" />
     <Compile Include="FCP8591Default.cs" />
